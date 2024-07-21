@@ -1,0 +1,25 @@
+{
+	debug
+
+	log {
+		output stdout
+		format console
+	}
+}
+
+(certificate_snippet) {
+	tls /etc/caddy/certs/wildcard.local.pem /etc/caddy/certs/wildcard.key.pem
+}
+
+{$SERVER_NAME} {
+	respond  "Hello, check API!"
+}
+
+api.{$SERVER_NAME} {
+	import certificate_snippet
+	root * /srv/core/public
+
+	php_fastcgi unix//var/run/php/php-fpm.sock
+	encode zstd gzip
+	file_server
+}

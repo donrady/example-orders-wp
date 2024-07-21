@@ -1,0 +1,31 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+    
+    elity.dev.utils.money.symfony.normalizer:
+        class: ElityDEV\Utils\Money\Bridge\Symfony\Serializer\Normalizer\MoneyNormalizer
+        autowire: true
+        tags:
+            - { name: 'serializer.normalizer', priority: 100 }
+    
+    elity.dev.utils.money.nullable.subscriber:
+        class: ElityDEV\Utils\Money\Bridge\Doctrine\EventSubscriber\NullableMoneyEventSubscriber
+        autowire: true
+        tags:
+            - { name: 'doctrine.event_subscriber' }
+        
+    ElityDEV\StateMachine\Service\:
+        resource: '../libs/elityDEV/StateMachine/Service'
+
+doctrine:
+    dbal:
+        types:
+            money: ElityDEV\Utils\Money\Bridge\Doctrine\DBAL\Types\MoneyType
+            currency: ElityDEV\Utils\Money\Bridge\Doctrine\DBAL\Types\CurrencyType
+    orm:
+        mappings:
+            Money:
+                type: xml
+                dir: "%kernel.project_dir%/libs/elityDEV/Utils/Money/Bridge/Doctrine/Resources"
+                prefix: Money

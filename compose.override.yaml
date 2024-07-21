@@ -1,0 +1,8 @@
+services:
+  tool-adminer:
+    image: adminer
+    restart: always
+    environment:
+      ADMINER_DESIGN: mancave
+    ports:
+      - "5400:8080"

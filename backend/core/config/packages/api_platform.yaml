@@ -1,0 +1,44 @@
+api_platform:
+    title: 'Core API | Orders'
+    show_webby: false
+    version: 1.0.0
+    mapping:
+        paths: ['%kernel.project_dir%/app/Entity', '%kernel.project_dir%/app/Api/Resource']
+    patch_formats:
+        json: [ 'application/merge-patch+json', 'application/ld+json', 'application/json' ]
+    formats:
+        jsonld: [ 'application/ld+json' ]
+        json: [ 'application/json' ]
+        html: [ 'text/html' ]
+        multipart: [ 'multipart/form-data' ]
+    docs_formats:
+        jsonld: [ 'application/ld+json' ]
+        jsonopenapi: [ 'application/vnd.openapi+json' ]
+        html: [ 'text/html' ]    
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+        extra_properties:
+            standard_put: true
+            rfc_7807_compliant_errors: true
+    keep_legacy_inflector: false
+    use_symfony_listeners: true
+    
+    exception_to_status:
+        # The 4 following handlers are registered by default, keep those lines to prevent unexpected side effects
+        Symfony\Component\Serializer\Exception\ExceptionInterface: 400 # Use a raw status code (recommended)
+        ApiPlatform\Core\Exception\InvalidArgumentException: 400
+        ApiPlatform\Core\Exception\FilterValidationException: 400
+        Doctrine\DBAL\Exception\UniqueConstraintViolationException: 409
+        Doctrine\ORM\OptimisticLockException: 409
+        
+        ApiPlatform\Core\Bridge\Symfony\Validator\Exception\ValidationException: 422
+        Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException: 400
+
+    swagger:
+        versions: [ 3 ]
+        api_keys:
+            authHeader:
+                name: Authorization
+                type: header

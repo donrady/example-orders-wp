@@ -1,0 +1,59 @@
+
+services:
+  proxy:
+    env_file:
+      - .env
+    build:
+      context: ./
+      dockerfile: ./.docker/Dockerfile
+      target: caddy-dev
+    depends_on:
+      - backend-core-api
+    volumes:
+      - ./.docker/caddy:/etc/caddy
+      - ./backend/core/public:/srv/core/public:ro
+      - php_socket:/var/run/php
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+      - "443:443/udp"
+
+  backend-core-api:
+    build:
+      context: ./
+      dockerfile: ./.docker/Dockerfile
+      target: backend-core-dev
+    depends_on:
+      - database
+    restart: unless-stopped
+    volumes:
+      - ./backend/core:/srv/core:rw,cached
+      - ./.docker/php/conf.d/app.dev.ini:/usr/local/etc/php/conf.d/php.ini
+      - ./.docker/php/php-fpm.d/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
+      - php_socket:/var/run/php
+      - backend_core_vendor:/srv/core/var
+      - backend_core_var:/srv/core/vendor
+    extra_hosts:
+      - docker.for.mac.localhost:host-gateway
+
+  database:
+    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - database_data:/var/lib/postgresql/data:rw
+    ports:
+      - "5432"
+
+volumes:
+  database_data:
+  php_socket:
+  backend_core_vendor:
+  backend_core_var:
